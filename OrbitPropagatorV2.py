@@ -7,6 +7,7 @@ from scipy.integrate import ode
 no_perts = perts.perts_dic
 j2_value = 0.00108248
 R = 6378.1363
+Omega_earth = 7.2921e-5
 AU = 149597870.7
 
 
@@ -33,7 +34,9 @@ def diff_eq(t, y, initial_time, mu, perts_dic):
             r_tb = AU * np.matmul(conv.MOD_2_GCCRF(initial_time.julian_cent()), r_tb)
         r_sat = r_tb-r
         a += perts.third_body_pert(perts_dic['TB'][2], r_sat, r_tb)
-
+    if perts_dic['Drag'][0]:
+        rho = perts.stand_atmo(r)
+        a += perts.drag(r, v, Omega_earth, rho, perts_dic['Drag'][1], perts_dic['Drag'][2], perts_dic['Drag'][3])
     dy[:3] = v
     dy[3:] = a
 

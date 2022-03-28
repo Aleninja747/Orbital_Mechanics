@@ -17,11 +17,25 @@ def J2_Pert(r, mu, r_planet=6378.1363, j2_value=0.00108248):
 
 
 def J3_Perts(r, mu, r_planet=6378.1363, j3_value=-2.5327e-6):
-    pass
+    a_j3 = np.zeros(3)
+    r_norm = np.linalg.norm(r)
+    a_j3_x = -5 * j3_value * mu * r_planet ** 3 * r[0] / (2 * r_norm ** 7) * (3 * r[2] - 7 * r[2] ** 3 / r_norm ** 2)
+    a_j3_y = -5 * j3_value * mu * r_planet ** 3 * r[1] / (2 * r_norm ** 7) * (3 * r[2] - 7 * r[2] ** 3 / r_norm ** 2)
+    a_j3_z = -5 * j3_value * mu * r_planet ** 3 / (2 * r_norm ** 7) * (6 * r[2] ** 2 - 7 * r[2] ** 4 / r_norm ** 2 - 3 / 5 * r_norm ** 2)
+
+    return a_j3
 
 
 def third_body_pert(mu_tb, r_sat_tb, r_main_tb):
     return mu_tb * ((r_sat_tb / (np.linalg.norm(r_sat_tb)**3)) - (r_main_tb / (np.linalg.norm(r_main_tb)**3)))
+
+
+def drag(r, v, omega_planet, rho, Cd, A, m):
+    v_rel = v - np.cross(omega_planet, r)  # in km/s
+    v_rel *= 1000  # in m/s
+    a_drag = 1/2 * Cd*A/m * rho * np.linalg.norm(v_rel) * v_rel  # in m/s^2
+    a_drag /= 1000  # in km/s^2
+    return a_drag
 
 
 def stand_atmo(r, radius=True):
@@ -144,3 +158,13 @@ def stand_atmo(r, radius=True):
         H = 7.249
 
     return rho0*np.exp(-(altitude-h0)/H)
+
+
+def a_srp(r, r_sun, Cr, A2M):
+    SF = 1367
+    c = 299792458
+    psrp = SF/c
+    r_ss = r-r_sun
+    r_norm = np.linalg.norm(r_ss)
+    p1 = (-psrp * A2M) * 1000
+    return p1*Cr*r_ss/r_norm
