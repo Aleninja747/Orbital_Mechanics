@@ -24,7 +24,8 @@ def diff_eq(t, y, initial_time, mu, perts_dic):
     #  Include J2 perturbation
     if perts_dic['J2']:
         a += perts.J2_Pert(r, mu, R, j2_value)
-
+    if perts_dic['J3']:
+        a += 1
     if perts_dic['TB'][0]:
         r_tb = 0
         if perts_dic['TB'][1] == 'sun':
