@@ -1,5 +1,6 @@
 import numpy as np
 import tools as t
+import math as m
 
 
 def cart2coes(r, v, mu, degrees=False, units='DU', print_results=False):
@@ -173,18 +174,18 @@ def virtually_0(arg, tol=1e-12):
 
 
 def euler_r3(angle):
-    return np.array([np.array([np.cos(angle), np.sin(angle), 0]), np.array([-np.sin(angle), np.cos(angle), 0]),
+    return np.array([np.array([m.cos(angle), m.sin(angle), 0]), np.array([-m.sin(angle), m.cos(angle), 0]),
                      np.array([0, 0, 1])])
 
 
 def euler_r2(angle):
-    return np.array([np.array([np.cos(angle), 0, -np.sin(angle)]), np.array([0, 1, 0]), np.array([np.sin(angle), 0,
-                                                                                                  np.cos(angle)])])
+    return np.array([np.array([m.cos(angle), 0, -m.sin(angle)]), np.array([0, 1, 0]), np.array([m.sin(angle), 0,
+                                                                                                  m.cos(angle)])])
 
 
 def euler_r1(angle):
-    return np.array([np.array([1, 0, 0]), np.array([0, np.cos(angle), np.sin(angle)]), np.array([0, -np.sin(angle),
-                                                                                                 np.cos(angle)])])
+    return np.array([np.array([1, 0, 0]), np.array([0, m.cos(angle), m.sin(angle)]), np.array([0, -m.sin(angle),
+                                                                                                 m.cos(angle)])])
 
 
 def PN_mat(x, dx, y, dy, s):
@@ -202,12 +203,12 @@ def PN_mat(x, dx, y, dy, s):
 
 
 def W_mat(sprime, xp, yp):
+    print(sprime/3600, xp/3600, yp/3600)
     r3 = euler_r3(np.deg2rad(-sprime / 3600))
     r2 = euler_r3(np.deg2rad(xp / 3600))
-    r1 = euler_r3(np.deg2rad((yp / 3600)))
+    r1 = euler_r3(np.deg2rad(yp / 3600))
 
-    wint = np.matmul(r2, r1)
-    return np.matmul(r3, wint)
+    return np.array(np.matmul(r3, np.matmul(r2, r1)))
 
 
 def MOD_2_GCCRF(julian_century):

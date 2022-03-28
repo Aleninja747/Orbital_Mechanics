@@ -1,9 +1,9 @@
 import numpy as np
 import tools as t
 import Conversions as conv
-from Outdated.TimeClass import Time
+from TimeClassV2 import Time
 
-Date = Time('UTC', year=2022, month=12, day=32.5)
+Date = Time('UTC', year=2022, month=2, day=19, hour=5, minute=59, second=0)
 dut1 = -0.110914
 xp = 0.016768
 yp = 0.357565
@@ -14,17 +14,14 @@ Y = 4.391260
 s = -0.006758
 leaps = 37
 
-print(Date)
-mjd_utc = Date.julian()
 Date.to_ut1()
-print(Date)
 mjd_ut1 = Date.julian()
 Date.to_tt()
-print(Date)
-mjd_tt = Date.julian()
 
-T_tt = t.julian_cent(mjd_tt)
-s_prime = -0.000047 * T_tt
+
+s_prime = -0.000047 * Date.julian_cent()
+s_i = xp/3600
+print(conv.W_mat(s_prime, xp, yp)[0, 1])
 
 print('1.1) JD_ut1:', mjd_ut1 + 2400000.5, '\n')
 
