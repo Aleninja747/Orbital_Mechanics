@@ -2,7 +2,9 @@ import numpy as np
 
 perts_dic = {
     'J2': False,
-    'TB': (False, 'None', 0)
+    'TB': (False, 'None', 0),
+    'J3': False,
+    'Drag': (False, 0, 0)
 }
 
 

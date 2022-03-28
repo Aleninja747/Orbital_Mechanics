@@ -53,7 +53,7 @@ def propagate_orbit(y0, initial_time, tspan, dt, mu=398600.4415, perts_dic=no_pe
         if abs(tspan-solver.t) < dt:
             dt = abs(tspan-solver.t)
         solver.integrate(solver.t + dt)
-        initial_time.add_days(dt)
+        initial_time.add_days(dt/86400)
         y.append(np.insert(solver.y, 0, solver.t))
 
     y = np.array(y)

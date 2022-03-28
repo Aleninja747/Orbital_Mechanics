@@ -61,8 +61,8 @@ plt.show()
 
 # 5
 initial_time = Time('UTC', day=2451545.0)
-tspan = 15*365.25
-dt = 0.5
+tspan = 365.25*86400
+dt = 0.5*86400
 perts_dic = perts.perts_dic
 perts_dic['TB'] = (True, 'sun', mu_sun)
 r = np.array([39066, 221558, 268116])
@@ -98,8 +98,4 @@ axs[0].set_title("Change in Orbital Elements vs. Time")
 hs_vec = np.array(hs_vec)
 fig, ax = plt.subplots()
 ax.plot(hs_vec[:, 0], hs_vec[:, 1])
-
-fig = plt.figure(figsize=(16, 8))
-ax = fig.add_subplot(111, projection='3d')
-ax.plot(rs[:, 0], rs[:, 1], rs[:, 2])
 plt.show()
