@@ -4,11 +4,12 @@ perts_dic = {
     'J2': False,
     'TB': (False, 'None', 0),
     'J3': False,
-    'Drag': (False, 0, 0)
+    'Drag': (False, 0, 0),
+    'SRP': (False, 0, 0)
 }
 
 
-def J2_Pert(r, mu, r_planet=6378.1363, j2_value=0.00108248):
+def J2_Pert(r, mu=398600.4415, r_planet=6300, j2_value=0.0010826267):
     norm_r = np.linalg.norm(r)
     z2 = r[2] ** 2
     r2 = norm_r ** 2
@@ -18,31 +19,37 @@ def J2_Pert(r, mu, r_planet=6378.1363, j2_value=0.00108248):
     return 1.5 * j2_value * mu * r_planet ** 2 / norm_r ** 4 * np.array([tx, ty, tz])
 
 
-def J3_Perts(r, mu, r_planet=6378.1363, j3_value=-2.5327e-6):
+def J3_Perts(r, mu=398600.4415, r_planet=6300, j3_value=-2.5327e-6):
     a_j3 = np.zeros(3)
     r_norm = np.linalg.norm(r)
-    a_j3_x = -5 * j3_value * mu * r_planet ** 3 * r[0] / (2 * r_norm ** 7) * (3 * r[2] - 7 * r[2] ** 3 / r_norm ** 2)
-    a_j3_y = -5 * j3_value * mu * r_planet ** 3 * r[1] / (2 * r_norm ** 7) * (3 * r[2] - 7 * r[2] ** 3 / r_norm ** 2)
-    a_j3_z = -5 * j3_value * mu * r_planet ** 3 / (2 * r_norm ** 7) * (6 * r[2] ** 2 - 7 * r[2] ** 4 / r_norm ** 2 - 3 / 5 * r_norm ** 2)
+    a_j3[0] = -5 * j3_value * mu * r_planet ** 3 * r[0] / (2 * r_norm ** 7) * (3 * r[2] - 7 * r[2] ** 3 / r_norm ** 2)
+    a_j3[1] = -5 * j3_value * mu * r_planet ** 3 * r[1] / (2 * r_norm ** 7) * (3 * r[2] - 7 * r[2] ** 3 / r_norm ** 2)
+    a_j3[2] = -5 * j3_value * mu * r_planet ** 3 / (2 * r_norm ** 7) * (6 * r[2] ** 2 - 7 * r[2] ** 4 / r_norm ** 2 - 3 / 5 * r_norm ** 2)
 
     return a_j3
 
 
 def third_body_pert(mu_tb, r_sat_tb, r_main_tb):
-    return mu_tb * ((r_sat_tb / (np.linalg.norm(r_sat_tb)**3)) - (r_main_tb / (np.linalg.norm(r_main_tb)**3)))
+    a_tb = mu_tb * ((r_sat_tb / (np.linalg.norm(r_sat_tb) ** 3)) - (r_main_tb / (np.linalg.norm(r_main_tb) ** 3)))
+    # print('Third Body: ', a_tb)
+    return a_tb
 
 
-def drag(r, v, omega_planet, rho, Cd, A, m):
+def drag(r, v, omega_planet, rho, Cd, A2m):
+    omega_planet = np.array([0, 0, omega_planet])
     v_rel = v - np.cross(omega_planet, r)  # in km/s
     v_rel *= 1000  # in m/s
-    a_drag = 1/2 * Cd*A/m * rho * np.linalg.norm(v_rel) * v_rel  # in m/s^2
+    a_drag = - 1/2 * Cd*A2m * rho * np.linalg.norm(v_rel) * v_rel  # in m/s^2
     a_drag /= 1000  # in km/s^2
+    # print('Drag: ', a_drag)
     return a_drag
 
 
 def stand_atmo(r, radius=True):
+    if not np.isscalar(r):
+        r = np.linalg.norm(r)
     if radius:
-        R_earth = 6378.1363
+        R_earth = 6300
         altitude = r - R_earth
     else:
         altitude = r
@@ -162,11 +169,12 @@ def stand_atmo(r, radius=True):
     return rho0*np.exp(-(altitude-h0)/H)
 
 
-def a_srp(r, r_sun, Cr, A2M):
-    SF = 1367
-    c = 299792458
-    psrp = SF/c
-    r_ss = r-r_sun
-    r_norm = np.linalg.norm(r_ss)
-    p1 = (-psrp * A2M) * 1000
-    return p1*Cr*r_ss/r_norm
+def srp(r, r_sun, C_r, A2m):
+    SF = 1367  # W/m^2
+    c = 299792458  # m/s
+    psrp = SF/c  # kg s^2/m
+    r_ss = (r_sun - r) * 1000  # m
+    r_norm = np.linalg.norm(r_ss)  # m
+    a_srp = (-psrp * C_r * A2m) * r_ss / r_norm  # m/s^2
+    # print('SRP: ', a_srp/1000)
+    return a_srp/1000

@@ -16,6 +16,7 @@ coes = [6700, 0.07, 69, 0, -14, 0]
 mu = 398600.4415
 r, v = conv.coes2cart(coes, mu, degree=True)
 y0 = np.concatenate([r, v], axis=None)
+print('test :', op.diff_eq(0, y0, initial_time, mu=mu, perts_dic=perts_dic))
 ys = op.propagate_orbit(y0, initial_time, tspan, dt, perts_dic=perts_dic)
 ts = ys[:, 0]
 rs = ys[:, 1:4]

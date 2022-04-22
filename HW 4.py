@@ -32,6 +32,10 @@ ax.legend()
 plt.show()
 
 # 4
+test_time = Time('UTC', day=2451545.0)
+r_sun_MOD = AU * sun(test_time.julian())
+r_sun_gcrf = np.matmul(conv.MOD_2_GCCRF(test_time.julian_cent()), r_sun_MOD)
+print(r_sun_gcrf)
 time = Time('UTC', day=2457793.5)
 r_sun_MOD = sun(time.julian())
 r_sun_gcrf = np.matmul(conv.MOD_2_GCCRF(time.julian_cent()), r_sun_MOD)
@@ -61,6 +65,9 @@ plt.show()
 
 # 5
 initial_time = Time('UTC', day=2451545.0)
+r_tb = sun(initial_time.julian())
+r_tb = AU * np.matmul(conv.MOD_2_GCCRF(initial_time.julian_cent()), r_tb)
+print('julian century: ', initial_time.julian_cent(), 'r_sun: ', r_tb)
 tspan = 365.25*86400
 dt = 0.5*86400
 perts_dic = perts.perts_dic
@@ -70,6 +77,7 @@ v = np.array([-1.19828, 0.211289, 0])
 print(t.calc_period(t.calc_sma_rv(r, v, 398600), 398600))
 print(t.calc_specific_energy(398600, r, v))
 y0 = np.concatenate([r, v], axis=None)
+print('test: ', op.diff_eq(0, y0, initial_time, 398600, perts_dic=perts_dic))
 ys = op.propagate_orbit(y0, initial_time, tspan, dt, 398600.4415, perts_dic=perts_dic)
 ts = ys[:, 0]
 rs = ys[:, 1:4]
@@ -83,7 +91,7 @@ for i in range(len(rs)):
     hs_vec.append(np.cross(rs[0], vs[0])-np.cross(rs[i], vs[i]))
     coes_delta = [0] * 6
     for j in range(len(temp_coes)):
-        coes_delta[j] = coes[j] - temp_coes[j]
+        coes_delta[j] =temp_coes[j] #coes[j]
     coes_vec.append(coes_delta)
 
 coes_vec = np.array(coes_vec)
